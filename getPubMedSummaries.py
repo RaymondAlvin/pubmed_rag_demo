@@ -1,5 +1,5 @@
+import json
 import requests
-
 
 def get_article_ids(search_query):
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
@@ -25,27 +25,34 @@ def get_article_ids(search_query):
     id_list = data['esearchresult']['idlist']
     return id_list
 
-def get_article_summaries(id_list):
-    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-    ids = ','.join(id_list)
+def get_article_content(article_id):
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     params = {
         'db': 'pubmed',
-        'id': ids,
-        'retmode': 'json'
+        'id': article_id,
+        'rettype': 'medline',  # Change to 'medline' for full text, 'abstract for abstract'
+        'retmode': 'text'
     }
     response = requests.get(base_url, params=params)
-    summaries = response.json()
-    return summaries  # You may want to parse this JSON to extract specific fields
-
+    return response.text
 
 def main():
     search_query = "caffeine AND health"
     article_ids = get_article_ids(search_query)
     if article_ids:
-        summaries = get_article_summaries(article_ids)
-        # Process and print summaries here. The structure of 'summaries' will depend on your specific needs.
-        print(summaries)  # Placeholder for demonstration. You'll likely need to extract and format data from the JSON.
+        all_articles = []
+        for article_id in article_ids:
+            content = get_article_content(article_id)
+            article_data = {
+                'id': article_id,
+                'content': content
+            }
+            all_articles.append(article_data)
+        
+        # Save article content to a JSON file
+        with open('article_content.json', 'w') as json_file:
+            json.dump(all_articles, json_file, indent=4)
+        print("Article content saved to article_content.json")
 
 if __name__ == "__main__":
     main()
-
