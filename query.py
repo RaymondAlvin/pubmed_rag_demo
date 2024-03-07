@@ -1,16 +1,6 @@
 from openai import OpenAI
 import os
 
-def load_api_key(file_path):
-    with open(file_path, 'r') as file:
-        # Read the API key from the file
-        api_key = file.read().strip()
-        # Set the environment variable
-        os.environ['OPENAI_API_KEY'] = api_key
-
-load_api_key('key.txt')
-
-OpenAI.api_key = os.environ['OPENAI_API_KEY']
 
 client = OpenAI(
     # This is the default and can be omitted
